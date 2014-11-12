@@ -3,21 +3,32 @@
  */
 Ext.define('Rally.gettingstarted.DataModels', {
     extend: 'Rally.app.App',
-    
+
+    requires: [
+        'Rally.data.ModelFactory.getModel'
+    ],
+
     /**
      * The app execution entry point
      * _getStoryModel should be called here
      */
     launch: function() {
-
+        // Get model
+        this._getStoryModel({
+            callback: this._getStoryModel
+        });
     },
 
     /**
      * Use Rally.data.ModelFactory to retrieve the story data model.
      * When complete, call _createStory
      */
-    _getStoryModel: function() {
-        
+    _getStoryModel: function(opt) {
+        return Rally.data.ModelFactory.getModel({
+            type: 'userstory',
+            success: this._createStory,
+            scope: this
+        });
     },
 
     /**
@@ -26,7 +37,12 @@ Ext.define('Rally.gettingstarted.DataModels', {
      * When complete, call _readStory
      */
     _createStory: function(model) {
-
+        story = Ext.create(model, {
+            Name: 'Fix dang ol chicken coop'
+        }).save({
+            success: this._readStory,
+            scope: this
+        });
     },
 
     /**
@@ -36,6 +52,10 @@ Ext.define('Rally.gettingstarted.DataModels', {
      */
     _readStory: function(story, operation) {
         var model = story.self;
+        model.load(story.getId(), {
+            callback: this._printStory,
+            scope: this
+        });
     },
 
     /**
@@ -45,7 +65,8 @@ Ext.define('Rally.gettingstarted.DataModels', {
      * Call _updateStory when done.
      */
     _printStory: function(story, operation) {
-
+        console.log(story.getId());
+        this._updateStory(story);
     },
 
     /**
@@ -54,7 +75,11 @@ Ext.define('Rally.gettingstarted.DataModels', {
      * When complete call _deleteStory
      */
     _updateStory: function(story) {
-
+        story.set('PlanEstimate', 5);
+        story.save({
+            callback: this._deleteStory,
+            scope: this
+        });
     },
 
     /**
@@ -63,6 +88,12 @@ Ext.define('Rally.gettingstarted.DataModels', {
      * When complete console.log a success message.
      */
     _deleteStory: function(story, operation) {
-
+        story.destroy({
+            callback: function(record, operation) {
+                if (e.success) {
+                    console.log('Deleted!');
+                }
+            }
+        });
     }
 });

@@ -1,4 +1,4 @@
-#Data Models
+# Data Models
 
 Models are the foundation upon which all data access is done in the App SDK.
 A model is simply a client side representation of a server side data type.
